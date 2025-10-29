@@ -1,0 +1,8 @@
+﻿.venv/
+__pycache__/
+*.log
+*.cache
+data/
+data_uruguay/
+
+/src/*.egg-info/

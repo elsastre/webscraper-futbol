@@ -1,8 +1,10 @@
-﻿.venv/
-__pycache__/
-*.log
-*.cache
+﻿__pycache__/
+*.pyc
+*.pyo
+.venv/
 data/
-data_uruguay/
-
-/src/*.egg-info/
+*.log
+logs/
+$HOME/.wdm/
+.vscode/
+.idea/

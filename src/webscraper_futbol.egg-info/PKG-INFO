@@ -1,0 +1,11 @@
+Metadata-Version: 2.4
+Name: webscraper_futbol
+Version: 0.1.1
+Requires-Python: >=3.8
+License-File: LICENSE
+Requires-Dist: requests
+Requires-Dist: beautifulsoup4
+Requires-Dist: html5lib
+Dynamic: license-file
+Dynamic: requires-dist
+Dynamic: requires-python
