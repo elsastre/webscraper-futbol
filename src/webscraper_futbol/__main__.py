@@ -13,7 +13,7 @@ def main():
     os.makedirs("data", exist_ok=True)
 
     out = "data/standings_uruguay.csv"
-    with open(out, "w", newline="", encoding="utf-8") as f:
+    with open(out, "w", newline="", encoding="utf-8-sig") as f:
         csv.writer(f).writerows(rows)
 
     print(f"✅ Filas: {len(rows)} guardado en {out}")
@@ -30,4 +30,5 @@ def _nfc(s):
         return unicodedata.normalize("NFC", s) if isinstance(s, str) else s
     except Exception:
         return s
+
 

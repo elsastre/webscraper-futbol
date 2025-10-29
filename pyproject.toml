@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "webscraper_futbol"
-version = "0.1.4"
-description = "Web scraper de fÃºtbol (Uruguay) con Selenium"
+version = "0.1.5"
+description = "Web scraper de fÃƒÂºtbol (Uruguay) con Selenium"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

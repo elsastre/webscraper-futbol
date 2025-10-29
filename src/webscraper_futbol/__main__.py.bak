@@ -24,3 +24,10 @@ if __name__ == "__main__":
     main()
 
 
+
+def _nfc(s):
+    try:
+        return unicodedata.normalize("NFC", s) if isinstance(s, str) else s
+    except Exception:
+        return s
+
