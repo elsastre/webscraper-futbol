@@ -8,7 +8,6 @@ src/webscraper_futbol/config.py
 src/webscraper_futbol.egg-info/PKG-INFO
 src/webscraper_futbol.egg-info/SOURCES.txt
 src/webscraper_futbol.egg-info/dependency_links.txt
-src/webscraper_futbol.egg-info/entry_points.txt
 src/webscraper_futbol.egg-info/requires.txt
 src/webscraper_futbol.egg-info/top_level.txt
 src/webscraper_futbol/scrapers/__init__.py

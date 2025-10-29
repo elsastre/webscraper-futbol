@@ -1,16 +1,32 @@
 ﻿param([switch]$FreshDriver)
 
-# Forzar salida UTF-8 en la consola
+$ErrorActionPreference = "Stop"
+if ($PSScriptRoot) { Set-Location $PSScriptRoot } else { Set-Location (Split-Path -Parent $MyInvocation.MyCommand.Path) }
+
 chcp 65001 > $null
 $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 
-Write-Host "==> Activando/creando venv" -ForegroundColor Cyan
-if (-not (Test-Path ".\.venv\Scripts\Activate")) { py -3 -m venv .venv }
-.\.venv\Scripts\Activate
+Write-Host "==> ScriptRoot: $PSScriptRoot" -ForegroundColor DarkGray
+Write-Host "==> PWD       : $(Get-Location)" -ForegroundColor DarkGray
 
-Write-Host "==> Instalando dependencias (si faltan)" -ForegroundColor Cyan
+$venv = Join-Path (Get-Location) ".venv"
+if (-not (Test-Path (Join-Path $venv "Scripts\Activate.ps1"))) { py -3 -m venv $venv }
+& (Join-Path $venv "Scripts\Activate.ps1")
+
 python -m pip install -U pip wheel setuptools | Out-Null
-pip install -e . | Out-Null  # layout src/
+
+if (Test-Path ".\requirements.txt") {
+  Write-Host "==> Instalando requirements.txt" -ForegroundColor Cyan
+  pip install -r requirements.txt
+} else {
+  Write-Host "==> Instalando dependencias mínimas" -ForegroundColor Cyan
+  pip install selenium webdriver-manager beautifulsoup4 requests html5lib
+}
+
+if (-not (Test-Path ".\pyproject.toml") -and -not (Test-Path ".\setup.py")) {
+  Throw "No se encontró pyproject.toml ni setup.py en: $(Get-Location)"
+}
+pip install -e . | Out-Null
 
 if ($FreshDriver) {
   Write-Host "==> Limpiando cache de WebDriver" -ForegroundColor Yellow

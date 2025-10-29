@@ -1,2 +1,0 @@
-[console_scripts]
-webscraper-futbol = webscraper_futbol.__main__:main

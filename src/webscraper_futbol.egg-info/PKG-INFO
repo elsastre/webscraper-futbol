@@ -1,11 +1,36 @@
 Metadata-Version: 2.4
 Name: webscraper_futbol
-Version: 0.1.1
+Version: 0.1.4
+Summary: Web scraper de fÃºtbol (Uruguay) con Selenium
 Requires-Python: >=3.8
+Description-Content-Type: text/markdown
 License-File: LICENSE
 Requires-Dist: requests
 Requires-Dist: beautifulsoup4
 Requires-Dist: html5lib
+Requires-Dist: selenium
+Requires-Dist: webdriver-manager
 Dynamic: license-file
-Dynamic: requires-dist
 Dynamic: requires-python
+
+﻿# Web Scraper Fútbol Uruguay 🇺🇾⚽
+
+Scraper de datos reales de la Primera División Uruguaya desde FBref.
+
+## 🚀 ¿Qué hace?
+
+- Extrae la tabla de posiciones del fútbol uruguayo (Liga Uruguaya)
+- Parseo completo de equipos + estadísticas
+- Guarda resultados en CSV dentro de `data/`
+- Funciona incluso con protección anti-bot (Selenium headless)
+
+✅ Código ejecutable desde terminal  
+✅ Datos reales  
+✅ Entrega lista para presentación
+
+---
+
+## 🧪 Ejemplo de uso
+
+```bash
+python -m webscraper_futbol
