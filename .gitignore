@@ -1,0 +1,9 @@
+﻿backend/.venv/
+backend/__pycache__/
+backend/.pytest_cache/
+auf-frontend/node_modules/
+auf-frontend/dist/
+auf-frontend/.vite/
+*.zip
+.vscode/
+.idea/
