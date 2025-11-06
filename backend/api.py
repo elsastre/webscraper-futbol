@@ -1,22 +1,31 @@
-﻿from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
+﻿from __future__ import annotations
+
 from pathlib import Path
 import csv
 
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+
 from webscraper_futbol.scrapers.fbref_scraper import get_table
+from auf_analyzer.services import (
+    CSV_STANDINGS,
+    get_team_table,
+    buscar_equipo_por_nombre,
+    ranking_equipos_por_puntos,
+    mejores_ataques,
+)
 
 API_TITLE = "AUF Analyzer API"
 URL = "https://fbref.com/en/comps/45/table/Primera-Division-Uruguay-Stats"
 
 DATA_DIR = Path("data")
-CSV_PATH = DATA_DIR / "standings_uruguay.csv"
 
 app = FastAPI(title=API_TITLE)
 
-# Habilitar CORS para que el frontend en React pueda llamar a la API
+# CORS para que el frontend pueda llamar a la API sin drama
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],      # si después querés, limitás a http://localhost:5173
+    allow_origins=["*"],  # si querés, después limitás a http://localhost:5173
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -25,21 +34,17 @@ app.add_middleware(
 
 def _build_rows_from_soup(soup):
     """
-    Arma una matriz [fila][columna] con:
-    - primera fila = encabezados
-    - resto = filas de equipos
+    Extrae encabezados y filas de la tabla HTML de FBref.
     """
     table = soup.find("table")
     if table is None:
         return []
 
-    # Encabezados
     headers = [th.get_text(strip=True) for th in table.select("thead tr th")]
-    rows = []
+    rows: list[list[str]] = []
     if headers:
         rows.append(headers)
 
-    # Cuerpo
     for tr in table.select("tbody tr"):
         cells = [c.get_text(strip=True) for c in tr.select("th,td")]
         if cells:
@@ -50,8 +55,8 @@ def _build_rows_from_soup(soup):
 
 def refresh_standings():
     """
-    Ejecuta el scraper, arma la tabla completa y la guarda en CSV.
-    Devuelve la matriz de filas.
+    Ejecuta el scraper, arma la tabla completa y la guarda en CSV_STANDINGS.
+    Devuelve la matriz de filas crudas.
     """
     soup = get_table(URL)
     rows = _build_rows_from_soup(soup)
@@ -60,7 +65,7 @@ def refresh_standings():
         raise RuntimeError("No se pudo encontrar la tabla de posiciones en FBref.")
 
     DATA_DIR.mkdir(exist_ok=True)
-    with CSV_PATH.open("w", newline="", encoding="utf-8") as f:
+    with CSV_STANDINGS.open("w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerows(rows)
 
@@ -69,12 +74,12 @@ def refresh_standings():
 
 def load_standings():
     """
-    Lee el CSV local (si existe) y devuelve la matriz de filas.
+    Lee el CSV local (si existe) y devuelve la matriz de filas crudas.
     """
-    if not CSV_PATH.exists():
+    if not CSV_STANDINGS.exists():
         return []
 
-    with CSV_PATH.open(newline="", encoding="utf-8") as f:
+    with CSV_STANDINGS.open(newline="", encoding="utf-8") as f:
         reader = csv.reader(f)
         return list(reader)
 
@@ -82,7 +87,7 @@ def load_standings():
 @app.get("/standings/refresh")
 def api_refresh_standings():
     """
-    Refresca desde FBref, guarda CSV y devuelve filas.
+    Refresca desde FBref, guarda CSV y devuelve filas crudas de la tabla.
     """
     try:
         rows = refresh_standings()
@@ -107,4 +112,84 @@ def api_get_standings():
         "count": len(rows),
         "rows": rows,
         "source": "local_csv",
+    }
+
+
+@app.get("/torneo/equipos")
+def api_list_equipos():
+    """
+    Devuelve la tabla de equipos con stats básicas
+    (mp, w, d, l, gf, ga, pts, gd).
+    """
+    try:
+        equipos = get_team_table()
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return {
+        "count": len(equipos),
+        "equipos": equipos,
+    }
+
+
+@app.get("/torneo/equipos/buscar")
+def api_buscar_equipo(nombre: str):
+    """
+    Busca un equipo por nombre (búsqueda parcial, case-insensitive).
+    """
+    try:
+        equipo = buscar_equipo_por_nombre(nombre)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    if equipo is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No se encontró ningún equipo que coincida con '{nombre}'.",
+        )
+
+    return equipo
+
+
+@app.get("/torneo/ranking")
+def api_ranking_equipos():
+    """
+    Devuelve todos los equipos ordenados por puntos
+    (y diferencia de goles como desempate).
+    """
+    try:
+        ranking = ranking_equipos_por_puntos()
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return {
+        "count": len(ranking),
+        "equipos": ranking,
+    }
+
+
+@app.get("/torneo/mejores-ataques")
+def api_mejores_ataques(top: int = 5):
+    """
+    Devuelve los equipos con más goles a favor.
+    """
+    if top <= 0:
+        top = 5
+
+    try:
+        equipos = mejores_ataques(top=top)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return {
+        "count": len(equipos),
+        "equipos": equipos,
     }

@@ -1,9 +1,33 @@
-﻿backend/.venv/
-backend/__pycache__/
-backend/.pytest_cache/
+﻿# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+env/
+venv/
+
+# Scraper output
+data/standings_uruguay.csv
+
+# Node / frontend
 auf-frontend/node_modules/
 auf-frontend/dist/
-auf-frontend/.vite/
-*.zip
+
+# Logs / entorno
+*.log
+.env
+
+# IDE / SO
 .vscode/
 .idea/
+*.iml
+.DS_Store
+Thumbs.db
+# --- repo hygiene (añadidos) ---
+/package-lock.json
+/backend/package-lock.json
+*.zip
+
+# Datos generados por el backend
+/backend/data/
+/**/standings_uruguay.csv
