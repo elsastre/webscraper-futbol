@@ -377,8 +377,35 @@ def top_scorers(limit: int | None = None) -> list[dict]:
     )
     # Guardamos el CSV derivado
     TOP_SCORERS_CSV.parent.mkdir(parents=True, exist_ok=True)
-    df_out.ensure_data_dir()\n    to_csv(TOP_SCORERS_CSV, index=False)
+    df_out.to_csv(TOP_SCORERS_CSV, index=False)
 
     # Y devolvemos como lista de dicts para la API
     return df_out.to_dict(orient="records")
+# --- patch Render: redirigir usos de "data" a DATA_DIR/standings.csv
+try:
+    import os, pandas as pd
+    DATA_DIR = os.getenv("DATA_DIR", "/app/data")
+    STANDINGS_CSV = os.path.join(DATA_DIR, "standings.csv")
 
+    os.makedirs(DATA_DIR, exist_ok=True)
+
+    _ORIG_TO_CSV = pd.DataFrame.to_csv
+    def _to_csv_safe(self, path_or_buf=None, *args, **kwargs):
+        if isinstance(path_or_buf, str):
+            p = path_or_buf.strip()
+            if p == "data" or p.endswith("/data"):
+                os.makedirs(DATA_DIR, exist_ok=True)
+                path_or_buf = STANDINGS_CSV
+        return _ORIG_TO_CSV(self, path_or_buf, *args, **kwargs)
+    pd.DataFrame.to_csv = _to_csv_safe
+
+    _ORIG_READ_CSV = pd.read_csv
+    def _read_csv_safe(path, *args, **kwargs):
+        if isinstance(path, str):
+            p = path.strip()
+            if p == "data" or p.endswith("/data"):
+                path = STANDINGS_CSV
+        return _ORIG_READ_CSV(path, *args, **kwargs)
+    pd.read_csv = _read_csv_safe
+except Exception:
+    pass
