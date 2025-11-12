@@ -377,7 +377,8 @@ def top_scorers(limit: int | None = None) -> list[dict]:
     )
     # Guardamos el CSV derivado
     TOP_SCORERS_CSV.parent.mkdir(parents=True, exist_ok=True)
-    df_out.to_csv(TOP_SCORERS_CSV, index=False)
+    df_out.ensure_data_dir()\n    to_csv(TOP_SCORERS_CSV, index=False)
 
     # Y devolvemos como lista de dicts para la API
     return df_out.to_dict(orient="records")
+
