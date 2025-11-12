@@ -208,6 +208,7 @@ def api_goleadores(top: int = Query(20, ge=1, le=100)):
         raise HTTPException(
             status_code=500,
             detail=f"No se pudieron calcular los goleadores: {exc}",
+<<<<<<< HEAD
         )# --- Healthcheck para despliegue ---
 try:
     from fastapi import FastAPI
@@ -225,3 +226,6 @@ except NameError:
     @tmp_app.get("/health")
     def health_tmp():
         return {"status": "ok"}
+=======
+        )
+>>>>>>> 1a7c7bb0fb656dee7058c4459df5e93d9a056725
