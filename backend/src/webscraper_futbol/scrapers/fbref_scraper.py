@@ -5,6 +5,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 
 def get_table(url: str):
+    # Si está definida, uso la URL de FBREF que venga del entorno (Render)
+    url = os.getenv('FBREF_STANDINGS_URL', url)
     opts = Options()
     opts.add_argument("--headless=new")
     opts.add_argument("--disable-gpu")
@@ -50,3 +52,4 @@ def extract_standings(soup: BeautifulSoup):
         if cells:
             rows.append(cells)
     return rows
+
