@@ -1,9 +1,8 @@
-﻿import time, random
+﻿import os, time, random
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 
 def get_table(url: str):
     opts = Options()
@@ -11,21 +10,35 @@ def get_table(url: str):
     opts.add_argument("--disable-gpu")
     opts.add_argument("--no-sandbox")
     opts.add_argument("--disable-dev-shm-usage")
-    opts.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                      "AppleWebKit/537.36 (KHTML, like Gecko) "
-                      "Chrome/122.0.0.0 Safari/537.36")
+    opts.add_argument("--window-size=1920,1080")
+    opts.add_argument(
+        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/122.0.0.0 Safari/537.36"
+    )
 
-    service = Service(ChromeDriverManager().install())
+    # MUY IMPORTANTE EN RENDER/DOCKER: usar el binario y driver del sistema
+    opts.binary_location = os.getenv("CHROME_BIN", "/usr/bin/chromium")
+    driver_path = os.getenv("CHROMEDRIVER_BIN", "/usr/bin/chromedriver")
+
+    # Intentar con el driver del sistema; si falla, caer a webdriver_manager
+    try:
+        service = Service(driver_path)
+    except Exception:
+        from webdriver_manager.chrome import ChromeDriverManager  # fallback
+        service = Service(ChromeDriverManager().install())
+
     drv = webdriver.Chrome(service=service, options=opts)
-
     try:
         drv.get(url)
-        time.sleep(random.uniform(2, 3))  # Esperar carga completa
+        time.sleep(random.uniform(2, 3))
         html = drv.page_source
         return BeautifulSoup(html, "html5lib")
     finally:
-        drv.quit()
-
+        try:
+            drv.quit()
+        except Exception:
+            pass
 
 def extract_standings(soup: BeautifulSoup):
     table = soup.find("table")
