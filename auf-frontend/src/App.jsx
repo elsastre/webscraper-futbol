@@ -1,6 +1,6 @@
 ﻿import { useEffect, useState } from "react";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = "https://auf-api.onrender.com";
 
 const VIEWS = {
   STANDINGS: "standings",
