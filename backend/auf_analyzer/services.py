@@ -7,6 +7,9 @@ from dataclasses import dataclass
 import itertools as it
 import re
 import pandas as pd
+import os
+DATA_DIR = os.getenv("DATA_DIR", "/app/data")
+STANDINGS_CSV = os.path.join(DATA_DIR, "standings.csv")
 
 # Ruta centralizada del CSV generado por el scraper
 CSV_STANDINGS = Path("data") / "standings_uruguay.csv"
